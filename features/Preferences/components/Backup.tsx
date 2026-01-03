@@ -1,7 +1,11 @@
 'use client';
 import * as React from 'react';
 import { Button } from '@/shared/components/ui/button';
-import { applyBackup, createBackup, type BackupFile } from '@/shared/lib/backup';
+import {
+  applyBackup,
+  createBackup,
+  type BackupFile
+} from '@/shared/lib/backup';
 
 const Backup: React.FC = () => {
   const fileRef = React.useRef<HTMLInputElement | null>(null);
@@ -35,16 +39,22 @@ const Backup: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-row gap-3">
-        <Button onClick={onExport} className="hover:cursor-pointer">Export</Button>
-        <Button variant="secondary" onClick={() => fileRef.current?.click()} className="hover:cursor-pointer">
+    <div className='flex flex-col gap-3'>
+      <div className='flex flex-row gap-3'>
+        <Button onClick={onExport} className='hover:cursor-pointer'>
+          Export
+        </Button>
+        <Button
+          variant='secondary'
+          onClick={() => fileRef.current?.click()}
+          className='hover:cursor-pointer'
+        >
           Import
         </Button>
         <input
           ref={fileRef}
-          type="file"
-          accept="application/json"
+          type='file'
+          accept='application/json'
           hidden
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const f = e.target.files?.[0];
@@ -53,9 +63,9 @@ const Backup: React.FC = () => {
         />
       </div>
       {message && (
-        <p className="text-sm text-[var(--secondary-color)]">{message}</p>
+        <p className='text-sm text-[var(--secondary-color)]'>{message}</p>
       )}
-      <p className="text-xs opacity-70">
+      <p className='text-xs opacity-70'>
         Exports only preferences and stats. No account data is included.
       </p>
     </div>

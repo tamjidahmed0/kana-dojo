@@ -18,6 +18,8 @@ import { useCrazyModeTrigger } from '@/features/CrazyMode/hooks/useCrazyModeTrig
 import { getGlobalAdaptiveSelector } from '@/shared/lib/adaptiveSelection';
 import { useSmartReverseMode } from '@/shared/hooks/useSmartReverseMode';
 import { useProgressiveDifficulty } from '@/shared/hooks/useProgressiveDifficulty';
+import { useWordBuildingMode } from '@/shared/hooks/useWordBuildingMode';
+import WordBuildingGame from './WordBuildingGame';
 
 const random = new Random();
 
@@ -100,6 +102,27 @@ const PickGame = ({ isHidden }: PickGameProps) => {
     streakPerLevel: 5,
     wrongsToDecrease: 2
   });
+
+  // Set to true to force word building mode for testing
+  const FORCE_WORD_BUILDING_MODE = true;
+
+  // Word building mode hook - triggers adaptively based on performance
+  const {
+    isWordBuildingMode: isWordBuildingModeFromHook,
+    isWordBuildingReverse,
+    wordLength,
+    decideNextMode: decideNextWordBuildingMode,
+    recordWrongAnswer: recordWordBuildingWrong,
+    exitWordBuildingMode
+  } = useWordBuildingMode({
+    minConsecutiveForTrigger: FORCE_WORD_BUILDING_MODE ? 0 : 3,
+    baseProbability: FORCE_WORD_BUILDING_MODE ? 1.0 : 0.15,
+    maxProbability: FORCE_WORD_BUILDING_MODE ? 1.0 : 0.4
+  });
+
+  // Override with forced mode for testing
+  const isWordBuildingMode =
+    FORCE_WORD_BUILDING_MODE || isWordBuildingModeFromHook;
 
   const {
     score,
@@ -477,8 +500,47 @@ const PickGame = ({ isHidden }: PickGameProps) => {
   const displayChar = isReverse ? correctRomajiCharReverse : correctKanaChar;
   const gameMode = 'pick';
 
+  // Exit word building mode if not enough characters
+  const hasEnoughCharsForWordBuilding = selectedKana.length >= wordLength;
+
   if (!selectedKana || selectedKana.length === 0) {
     return null;
+  }
+
+  // Handle word building mode correct answer
+  const handleWordBuildingCorrect = (chars: string[]) => {
+    // Update both difficulty systems
+    chars.forEach(() => {
+      recordDifficultyCorrect();
+    });
+    // Decide next mode (may exit word building)
+    decideNextWordBuildingMode();
+    decideNextMode();
+  };
+
+  // Handle word building mode wrong answer
+  const handleWordBuildingWrong = () => {
+    recordWordBuildingWrong();
+    recordDifficultyWrong();
+    recordWrongAnswer();
+  };
+
+  // Render word building game if in that mode and have enough characters
+  if (isWordBuildingMode && hasEnoughCharsForWordBuilding) {
+    return (
+      <WordBuildingGame
+        isHidden={isHidden}
+        isReverse={isWordBuildingReverse}
+        wordLength={wordLength}
+        onCorrect={handleWordBuildingCorrect}
+        onWrong={handleWordBuildingWrong}
+      />
+    );
+  }
+
+  // Exit word building mode if not enough chars
+  if (isWordBuildingMode && !hasEnoughCharsForWordBuilding) {
+    exitWordBuildingMode();
   }
 
   return (
