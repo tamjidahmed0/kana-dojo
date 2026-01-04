@@ -195,10 +195,10 @@ const GameModes = ({
           {/* Header */}
           <div className='space-y-3 text-center'>
             {mode === 'blitz' && (
-              <Zap size={56} className='mx-auto text-[var(--main-color)]' />
+              <Zap size={56} className='mx-auto text-[var(--secondary-color)]' />
             )}
             {mode === 'train' && (
-              <Play size={56} className='mx-auto text-[var(--main-color)]' />
+              <Play size={56} className='mx-auto text-[var(--secondary-color)]' />
             )}
             <h1 className='text-2xl font-bold text-[var(--main-color)]'>
               {dojoLabel}{' '}
